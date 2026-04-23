@@ -45,6 +45,8 @@ pub enum ContractError {
     InsufficientPermission = 7,
     /// Invalid version provided for migration
     InvalidVersion = 8,
+    /// WASM hash cannot be zero
+    InvalidWasmHash = 9,
 }
 
 /// Event topic naming convention
@@ -289,6 +291,10 @@ impl AncoreAccount {
     pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) -> Result<(), ContractError> {
         let owner = Self::get_owner(env.clone())?;
         owner.require_auth();
+
+        if new_wasm_hash == BytesN::from_array(&env, &[0u8; 32]) {
+            return Err(ContractError::InvalidWasmHash);
+        }
 
         // Increment version number
         let current_version = Self::get_version(env.clone());
@@ -1152,5 +1158,21 @@ mod test {
 
         let res_u64: u64 = soroban_sdk::FromVal::from_val(&env, &result);
         assert_eq!(res_u64, 0);
+    }
+
+    #[test]
+    fn test_upgrade_rejects_zero_hash() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, AncoreAccount);
+        let client = AncoreAccountClient::new(&env, &contract_id);
+
+        let owner = Address::generate(&env);
+        client.initialize(&owner);
+        env.mock_all_auths();
+
+        let zero_hash = BytesN::from_array(&env, &[0u8; 32]);
+        let result = client.try_upgrade(&zero_hash);
+
+        assert_eq!(result, Err(Ok(ContractError::InvalidWasmHash)));
     }
 }
