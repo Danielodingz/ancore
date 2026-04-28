@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { cn } from '@ancore/ui-kit';
 import { useTableDensity } from '../contexts/TableDensityContext';
 import { Settings, Rows } from 'lucide-react';
+import { QuickActionBar } from './QuickActionBar';
 
 const NAV_LINKS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -45,7 +46,10 @@ export const Layout: React.FC = () => (
           </NavLink>
         ))}
       </nav>
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex-1 flex justify-center">
+        <QuickActionBar />
+      </div>
+      <div className="flex items-center gap-2">
         <DensityToggle />
         <Settings className="w-4 h-4 text-muted-foreground" />
       </div>
