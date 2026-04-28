@@ -4,6 +4,7 @@ import { cn } from '@ancore/ui-kit';
 import { useTableDensity } from '../contexts/TableDensityContext';
 import { Settings, Rows } from 'lucide-react';
 import { QuickActionBar } from './QuickActionBar';
+import { MobileNav } from './MobileNav';
 
 const NAV_LINKS = [
   { to: '/', label: 'Dashboard', end: true },
@@ -28,8 +29,11 @@ const DensityToggle: React.FC = () => {
 export const Layout: React.FC = () => (
   <div className="min-h-screen bg-background text-foreground">
     <header className="border-b px-6 py-3 flex items-center gap-6">
+      <div className="lg:hidden">
+        <MobileNav links={NAV_LINKS} />
+      </div>
       <span className="font-semibold text-lg">Ancore</span>
-      <nav className="flex gap-4">
+      <nav className="hidden lg:flex gap-4">
         {NAV_LINKS.map(({ to, label, end }) => (
           <NavLink
             key={to}
