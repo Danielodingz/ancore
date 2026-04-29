@@ -87,7 +87,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       </CardHeader>
       <CardContent className={density === 'compact' ? 'space-y-1' : 'space-y-2'}>
         {visible.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No transactions found.</p>
+          <EmptyState title="No transactions found." />
         ) : (
           visible.map((tx, index) => {
             const isOptimistic = tx.id === optimisticTransaction?.id;
