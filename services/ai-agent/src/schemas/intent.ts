@@ -9,6 +9,7 @@ export const paymentIntentSchema = z.object({
   amount: z.string().regex(/^\d+(\.\d+)?$/, 'Invalid amount format'),
   asset: z.enum(['XLM', 'USDC']),
   destination: z.string().min(1, 'Destination is required'),
+  requiresConfirmation: z.boolean().optional(),
 });
 
 /**
@@ -22,3 +23,9 @@ export const intentSchema = z.discriminatedUnion('type', [
 
 export type PaymentIntent = z.infer<typeof paymentIntentSchema>;
 export type Intent = z.infer<typeof intentSchema>;
+
+/**
+ * High-value payment threshold for confirmation requirement.
+ * Payments above this amount require user confirmation.
+ */
+export const HIGH_VALUE_PAYMENT_THRESHOLD = 1000;
