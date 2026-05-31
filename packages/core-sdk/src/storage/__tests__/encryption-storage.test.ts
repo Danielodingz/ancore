@@ -82,7 +82,7 @@ describe('WebExtension storage encryption integration', () => {
 
   beforeEach(async () => {
     mockStorage = createMockChromeStorage();
-     
+
     const { ChromeStorageAdapter } = await import('../storage-adapter');
     adapter = new ChromeStorageAdapter(mockStorage.area as unknown as chrome.storage.StorageArea);
   });
