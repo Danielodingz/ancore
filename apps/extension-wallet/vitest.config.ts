@@ -10,6 +10,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    // Crypto-heavy security tests run in Node — jsdom subtle is unreliable on Linux CI.
+    environmentMatchGlobs: [
+      ['src/security/__tests__/vault-export.test.ts', 'node'],
+      ['src/security/__tests__/extension-storage-encryption.test.ts', 'node'],
+    ],
     setupFiles: ['../../packages/ensure-webcrypto.ts', './src/test/setup.ts'],
     testTimeout: 30000,
     css: true,

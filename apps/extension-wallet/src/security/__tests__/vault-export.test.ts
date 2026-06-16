@@ -1,4 +1,3 @@
-import { webcrypto } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { encryptSecretKey } from '@ancore/crypto';
 import { SecureStorageManager, type StorageAdapter } from '@ancore/core-sdk';
@@ -10,15 +9,6 @@ import {
   verifyVaultPassword,
 } from '../vault-export';
 import { getSharedStorageManager } from '../storage-manager';
-
-Object.defineProperty(globalThis, 'crypto', {
-  value: webcrypto,
-  configurable: true,
-  writable: true,
-});
-
-globalThis.btoa = (value: string) => Buffer.from(value, 'binary').toString('base64');
-globalThis.atob = (value: string) => Buffer.from(value, 'base64').toString('binary');
 
 class MockStorageAdapter implements StorageAdapter {
   private store = new Map<string, unknown>();
@@ -67,7 +57,7 @@ describe('vault-export', () => {
   let storage: MockStorageAdapter;
 
   beforeEach(() => {
-    localStorage.clear();
+    globalThis.localStorage?.clear?.();
     storage = new MockStorageAdapter();
     resetVaultStorageManagerForTests(storage);
   });
