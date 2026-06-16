@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "corepack pnpm --dir ../.. --filter @ancore/ui-kit build",
     "dev": "vite",
+    "prebuild": "corepack pnpm --dir ../.. --filter @ancore/ui-kit build",
     "build": "vite build",
     "test": "vitest run",
     "pretest": "corepack pnpm --dir ../.. --filter @ancore/ui-kit build",

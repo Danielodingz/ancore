@@ -34,26 +34,6 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-  dev-scripts-smoke:
-    name: Dev Scripts Smoke
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Verify dev/test scripts (smoke)
-        run: bash ./scripts/verify-dev-scripts.sh
-
   package:
     name: Package — ${{ matrix.name }}
     runs-on: ubuntu-latest

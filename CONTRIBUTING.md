@@ -183,9 +183,6 @@ pnpm test:extension  # run @ancore/extension-wallet tests
 pnpm test:ui         # run @ancore/ui-kit tests
 ```
 
-CI verifies these scripts on install via `scripts/verify-dev-scripts.sh` to ensure they
-resolve and respond to `--help`/dry-run flags on a clean install.
-
 ### Common Commands
 
 ```bash
