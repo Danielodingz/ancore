@@ -25,11 +25,11 @@ describe('extension router', () => {
     document.title = 'Ancore Extension';
   });
 
-  it('redirects first-time users to welcome when they hit a protected route', () => {
+  it('redirects first-time users to onboarding when they hit a protected route', () => {
     renderRouter('/home');
 
-    expect(screen.getByRole('heading', { name: /meet your ancore wallet/i })).toBeInTheDocument();
-    expect(document.title).toBe('Welcome | Ancore Extension');
+    expect(screen.getByRole('heading', { name: /welcome to ancore/i })).toBeInTheDocument();
+    expect(document.title).toBe('Create Wallet | Ancore Extension');
   });
 
   it('redirects onboarded locked users to unlock', () => {
