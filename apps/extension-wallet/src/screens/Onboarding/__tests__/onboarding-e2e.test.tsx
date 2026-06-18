@@ -28,7 +28,9 @@ describe('Onboarding E2E Flow', () => {
       <MnemonicScreen mnemonic={mockMnemonic} onNext={onMnemonicNext} onBack={vi.fn()} />
     );
 
-    expect(screen.getByRole('heading', { level: 1, name: /Your Recovery Phrase/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /Your Recovery Phrase/i })
+    ).toBeInTheDocument();
     expect(screen.getByText(/Never share your recovery phrase/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /I've Saved My Recovery Phrase/i }));
     expect(onMnemonicNext).toHaveBeenCalled();
@@ -36,9 +38,7 @@ describe('Onboarding E2E Flow', () => {
 
     // Step 3: Password Screen
     const onPasswordSubmit = vi.fn();
-    const { unmount: u3 } = render(
-      <PasswordScreen onSubmit={onPasswordSubmit} onBack={vi.fn()} />
-    );
+    const { unmount: u3 } = render(<PasswordScreen onSubmit={onPasswordSubmit} onBack={vi.fn()} />);
 
     expect(screen.getByText(/Create Your Password/i)).toBeInTheDocument();
 

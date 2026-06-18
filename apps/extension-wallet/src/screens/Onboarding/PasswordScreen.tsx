@@ -146,7 +146,9 @@ export function PasswordScreen({ onSubmit, onBack }: PasswordScreenProps) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Password Input */}
           <div className="space-y-2">
-            <label htmlFor="password-input" className="text-sm font-medium text-foreground">Password</label>
+            <label htmlFor="password-input" className="text-sm font-medium text-foreground">
+              Password
+            </label>
             <div className="relative">
               <input
                 id="password-input"
@@ -213,7 +215,9 @@ export function PasswordScreen({ onSubmit, onBack }: PasswordScreenProps) {
 
           {/* Confirm Password Input */}
           <div className="space-y-2">
-            <label htmlFor="confirm-password-input" className="text-sm font-medium text-foreground">Confirm Password</label>
+            <label htmlFor="confirm-password-input" className="text-sm font-medium text-foreground">
+              Confirm Password
+            </label>
             <div className="relative">
               <input
                 id="confirm-password-input"

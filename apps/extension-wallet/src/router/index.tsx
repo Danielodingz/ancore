@@ -11,12 +11,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Copy,
-  Lock,
-  PlusCircle,
-} from 'lucide-react';
+import { ArrowLeft, Copy, Lock, PlusCircle } from 'lucide-react';
 import { NotificationProvider } from '@ancore/ui-kit';
 import {
   AuthGuard,
@@ -221,9 +216,7 @@ function DemoCreateAccountScreen() {
               value={walletName}
             />
           </label>
-          <PrimaryButton type="submit">
-            Create wallet (demo)
-          </PrimaryButton>
+          <PrimaryButton type="submit">Create wallet (demo)</PrimaryButton>
         </form>
       </Card>
     </PageScaffold>
@@ -623,8 +616,8 @@ export function ExtensionRouterContent() {
             }
             path="/onboarding/*"
           />
-          {/* Demo create-account path — dev only, gated by VITE_DEMO_ROUTER */}
-          {import.meta.env.DEV && import.meta.env.VITE_DEMO_ROUTER === 'true' && (
+          {/* Demo create-account path — dev only */}
+          {import.meta.env.DEV && (
             <Route
               element={
                 <PublicOnlyGuard mode="onboarding">
