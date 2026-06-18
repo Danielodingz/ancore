@@ -6,7 +6,6 @@
 
 import type {
   ExternalHandlerContext,
-  ExternalApiMethodName,
   RequestAccessResult,
   GetAddressResult,
   GetSmartAccountResult,
@@ -14,7 +13,7 @@ import type {
 } from '@ancore/types';
 import { ExternalApiMethodName as MethodName } from '@ancore/types';
 import { isAllowed, addToAllowlist } from './allowlist';
-import { enqueueApproval, registerResponseCallbacks } from './response-queue';
+import { enqueueApproval } from './response-queue';
 
 /**
  * requestAccess handler

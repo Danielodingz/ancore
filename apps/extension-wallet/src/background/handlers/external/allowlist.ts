@@ -69,8 +69,8 @@ async function loadAllowlist(): Promise<Map<string, AllowlistEntry>> {
     const entries = JSON.parse(raw) as AllowlistEntry[];
     const map = new Map<string, AllowlistEntry>();
     for (const entry of entries) {
-      const key = generateKey(entry.network, entry.smartAccountId, entry.origin);
-      map.set(key, entry);
+      const _key = generateKey(entry.network, entry.smartAccountId, entry.origin);
+      map.set(_key, entry);
     }
     return map;
   } catch {
