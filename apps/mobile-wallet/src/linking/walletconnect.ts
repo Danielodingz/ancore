@@ -20,17 +20,12 @@ export interface WalletConnectDeepLinkParams {
 export const parseWalletConnectDeepLink = (url: string): WalletConnectDeepLinkParams | null => {
   try {
     // Validate URL format
-    if (!url.startsWith('ancore://wc?')) {
+    if (!url.startsWith('ancore://wc?uri=')) {
       return null;
     }
 
-    // Extract query parameters
-    const urlObj = new URL(url);
-    const uri = urlObj.searchParams.get('uri');
-
-    if (!uri) {
-      return null;
-    }
+    // Extract everything after uri= - the WalletConnect URI may contain its own query params
+    const uri = url.substring('ancore://wc?uri='.length);
 
     // Validate that it's a WalletConnect URI
     if (!uri.startsWith('wc:')) {

@@ -139,6 +139,6 @@ export const handleStellarRpcRequest = (
     case 'stellar_signAuthEntry':
       return handlers.handleStellarSignAuthEntry(params as { authEntry: string }, session);
     default:
-      throw new Error(`Unknown Stellar RPC method: ${method}`);
+      return Promise.reject(new Error(`Unknown Stellar RPC method: ${method}`));
   }
 };
