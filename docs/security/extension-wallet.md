@@ -124,6 +124,24 @@ The extension wallet enforces optional **daily transfer limits** and **step-up t
 
 ---
 
+## Permissions
+
+The extension requests the following permissions in `manifest.json`:
+
+### `storage`
+
+Required for persisting wallet state, settings, and allowlist entries via `chrome.storage.local` and `chrome.storage.session`.
+
+### `sidePanel` (Chrome 116+, MV3)
+
+Enables the side panel approval UX for dApp sign requests. When the background receives a `signTransaction` request, it opens a side panel pinned to the current tab rather than a popup window. The side panel stays visible while the user interacts with the dApp, unlike a popup which closes on outside click.
+
+- **Chrome 116+**: `chrome.sidePanel.setOptions({ path })` + `chrome.sidePanel.open()`
+- **Firefox / no `sidePanel` API**: Falls back to `chrome.windows.create()` popup
+- The side panel loads `sidepanel/index.html` and renders the same `SignTransactionApprovalScreen` component used in the popup `/sign-transaction` route
+
+When adding or removing permissions, update both `manifest.json` and this section.
+
 ## References
 
 - [Chrome MV3 CSP documentation](https://developer.chrome.com/docs/extensions/mv3/manifest/content_security_policy/)

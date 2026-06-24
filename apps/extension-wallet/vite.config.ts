@@ -70,6 +70,7 @@ export default defineConfig({
         'popup/index': path.resolve(__dirname, 'src/popup/index.html'),
         background: path.resolve(__dirname, 'src/background/service-worker.ts'),
         'content-script/content-script': path.resolve(__dirname, 'src/content-script/index.ts'),
+        'sidepanel/index': path.resolve(__dirname, 'src/sidepanel/index.html'),
       },
       output: {
         entryFileNames: (chunkInfo) => {

@@ -5,6 +5,8 @@ import {
   registerAllExternalHandlers,
   dispatchExternalRequest,
 } from '@/background/handlers/external';
+import { openMockApproval } from './approval-window';
+import { resolveRequest, rejectRequest } from './handlers/external/response-queue';
 import type { ExternalApiRequest, ExternalApiMethodName } from '@ancore/types';
 
 type ChromeRuntimeManifest = {
@@ -34,6 +36,25 @@ declare const chrome: {
         ) => boolean | void
       ): void;
     };
+    getURL(path: string): string;
+  };
+  tabs: {
+    query(queryInfo: {
+      active?: boolean;
+      lastFocusedWindow?: boolean;
+    }): Promise<{ id?: number; windowId?: number }[]>;
+  };
+  sidePanel?: {
+    setOptions(options: { path?: string; enabled?: boolean }): Promise<void>;
+    open(options: { windowId: number }): Promise<void>;
+  };
+  windows: {
+    create(createData: {
+      url?: string;
+      type?: string;
+      width?: number;
+      height?: number;
+    }): Promise<{ id?: number }>;
   };
 };
 
@@ -145,3 +166,28 @@ chrome.runtime.onMessage.addListener(
 // Register internal handlers and activate dispatcher
 registerInternalHandlers();
 installMessageDispatcher();
+
+// Dev-only: handle mock approval requests from popup
+chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
+  if ((message as { type?: string }).type === 'DEV_OPEN_APPROVAL') {
+    void openMockApproval().then(() => sendResponse({ ok: true }));
+    return true;
+  }
+  return false;
+});
+
+// Handle approve/reject from side panel or popup approval screen
+chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
+  const msg = message as { type?: string; requestId?: string };
+  if (msg.type === 'APPROVE_SIGN_REQUEST' && msg.requestId) {
+    resolveRequest(msg.requestId, { signedXdr: 'AAAAAgAAAAA=' });
+    sendResponse({ ok: true });
+    return true;
+  }
+  if (msg.type === 'REJECT_SIGN_REQUEST' && msg.requestId) {
+    rejectRequest(msg.requestId, new Error('User rejected the sign request'));
+    sendResponse({ ok: true });
+    return true;
+  }
+  return false;
+});

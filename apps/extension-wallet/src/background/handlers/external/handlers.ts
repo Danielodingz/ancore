@@ -14,6 +14,7 @@ import type {
 import { ExternalApiMethodName as MethodName } from '@ancore/types';
 import { isAllowed, addToAllowlist } from './allowlist';
 import { enqueueApproval } from './response-queue';
+import { openApprovalWindow } from '../../approval-window';
 
 /**
  * requestAccess handler
@@ -124,11 +125,8 @@ export async function handleSignTransaction(
   // Enqueue for approval
   enqueueApproval(requestId, origin, MethodName.SIGN_TRANSACTION, params);
 
-  // In production, this would:
-  // 1. Open /sign-transaction?requestId= popup
-  // 2. Wait for user approval
-  // 3. Call sendMessage('SIGN_TRANSACTION') to background
-  // 4. Return signed XDR
+  // Open approval window (side panel on Chrome 116+, popup fallback)
+  void openApprovalWindow(requestId);
 
   // For MVP, return a mock signed XDR
   return {

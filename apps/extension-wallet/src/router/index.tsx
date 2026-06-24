@@ -22,6 +22,7 @@ import {
 } from './AuthGuard';
 import { OnboardingFlow } from '../screens/Onboarding/OnboardingFlow';
 import { DeployTestScreen } from '../screens/Onboarding/DeployTestScreen';
+import { SignTransactionApprovalScreen } from '../screens/SignTransactionApprovalScreen';
 import { NavBar } from '../components/Navigation/NavBar';
 import { ReceiveScreen as ReceiveScreenComponent } from '../screens/ReceiveScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
@@ -48,6 +49,7 @@ const pageTitles: Record<string, string> = {
   '/history': 'History',
   '/settings': 'Settings',
   '/session-keys': 'Session Keys',
+  '/sign-transaction': 'Sign Transaction',
 };
 
 function getPageTitle(pathname: string): string {
@@ -331,6 +333,15 @@ function HomeScreen() {
         <SecondaryLink to="/history">View history</SecondaryLink>
         <SecondaryLink to="/session-keys">Session keys</SecondaryLink>
       </div>
+      {import.meta.env.DEV && (
+        <button
+          className="mt-4 w-full rounded-xl border border-dashed border-yellow-500/50 px-4 py-3 text-sm font-semibold text-yellow-600 transition hover:bg-yellow-500/10"
+          onClick={() => chrome.runtime.sendMessage({ type: 'DEV_OPEN_APPROVAL' })}
+          type="button"
+        >
+          Test side panel sign
+        </button>
+      )}
     </PageScaffold>
   );
 }
@@ -856,6 +867,7 @@ export function ExtensionRouterContent() {
               <Route element={<SessionKeysScreen />} path="/session-keys" />
             </Route>
           </Route>
+          <Route element={<SignTransactionApprovalScreen />} path="/sign-transaction" />
           <Route element={<NotFoundScreen />} path="*" />
         </Routes>
       </ErrorBoundary>
