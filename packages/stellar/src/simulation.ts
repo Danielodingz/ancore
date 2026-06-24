@@ -73,7 +73,7 @@ function extractAuthEntries(response: rpc.Api.SimulateTransactionSuccessResponse
   if (!result) {
     return [];
   }
-  return result.auth ?? [];
+  return (result.auth ?? []).map((entry) => entry.toXDR('base64'));
 }
 
 function extractFootprint(response: rpc.Api.SimulateTransactionSuccessResponse): string {
