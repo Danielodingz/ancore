@@ -67,15 +67,13 @@ function classicSimulationResult(transaction: Transaction): ParsedSimulationResu
   };
 }
 
-function extractAuthEntries(
-  response: rpc.Api.SimulateTransactionSuccessResponse
-): string[] {
-  // In stellar-sdk v13+, auth entries live on each result, not on transactionData
-  const results = response.results;
-  if (!results || results.length === 0) {
+function extractAuthEntries(response: rpc.Api.SimulateTransactionSuccessResponse): string[] {
+  // In stellar-sdk v13+, auth entries live on result (singular), not results
+  const result = response.result;
+  if (!result) {
     return [];
   }
-  return results.flatMap((r) => r.auth ?? []);
+  return result.auth ?? [];
 }
 
 function extractFootprint(response: rpc.Api.SimulateTransactionSuccessResponse): string {
@@ -183,9 +181,7 @@ export function parseSimulationResponse(
 export function simulateUnsignedTransaction(
   unsignedXdr: string,
   networkPassphrase: string,
-  rpcSimulate: (
-    transaction: Transaction
-  ) => Promise<rpc.Api.SimulateTransactionResponse>
+  rpcSimulate: (transaction: Transaction) => Promise<rpc.Api.SimulateTransactionResponse>
 ): Promise<ParsedSimulationResult> {
   const transaction = parseTransaction(unsignedXdr, networkPassphrase);
   if (!transaction) {
