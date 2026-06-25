@@ -14,6 +14,7 @@ import { validateBody } from './validation/middleware';
 import { createExecuteRelayHandler } from './handlers/executeRelay';
 import { createValidateRelayHandler } from './handlers/validateRelay';
 import { IdempotencyStore } from './store/idempotency';
+import { NonceStore } from './store/nonceStore';
 import { JobQueue } from './queue/JobQueue';
 import type {
   AuthServiceContract,
@@ -82,7 +83,8 @@ export function createApp(
   signatureService: SignatureServiceContract = defaultSignatureService,
   idempotencyStore: IdempotencyStore = new IdempotencyStore(),
   transactionSubmitter?: TransactionSubmitterContract,
-  relayOptions?: RelayServiceOptions
+  relayOptions?: RelayServiceOptions,
+  nonceStore: NonceStore = new NonceStore()
 ): Express {
   const app = express();
 
@@ -135,10 +137,17 @@ export function createApp(
   });
 
   const jobQueue = new JobQueue();
-  const relayService = new RelayService(signatureService, jobQueue, idempotencyStore, submitter, {
-    useMockSubmission,
-    ...relayOptions,
-  });
+  const relayService = new RelayService(
+    signatureService,
+    jobQueue,
+    idempotencyStore,
+    submitter,
+    {
+      useMockSubmission,
+      ...relayOptions,
+    },
+    nonceStore
+  );
   const auth = createAuthMiddleware(authService);
   const validate = validateBody(relayRequestSchema);
   const idempotency = createIdempotencyMiddleware(idempotencyStore);

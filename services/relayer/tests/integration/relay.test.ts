@@ -225,7 +225,7 @@ describe('POST /relay/execute — idempotency-key header', () => {
       .post('/relay/execute')
       .set('Authorization', 'Bearer token')
       .set('idempotency-key', 'key-b')
-      .send(validBody);
+      .send({ ...validBody, nonce: 2 });
 
     expect(r1.status).toBe(200);
     expect(r2.status).toBe(200);
@@ -262,5 +262,61 @@ describe('POST /relay/execute — idempotency-key header', () => {
     await request(app).post('/relay/execute').set('Authorization', 'Bearer token').send(validBody);
 
     expect(store.size()).toBe(0);
+  });
+
+  it('rejects duplicate nonces with NONCE_REPLAY error code', async () => {
+    const app = makeApp(true, undefined, undefined, { useMockSubmission: true });
+
+    // First request
+    const r1 = await request(app)
+      .post('/relay/execute')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(r1.status).toBe(200);
+
+    // Replay request with same nonce
+    const r2 = await request(app)
+      .post('/relay/execute')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(r2.status).toBe(422);
+    expect(r2.body.success).toBe(false);
+    expect(r2.body.error.code).toBe('NONCE_REPLAY');
+  });
+
+  it('does not consume nonce on /relay/validate but rejects it after execution', async () => {
+    const app = makeApp(true, undefined, undefined, { useMockSubmission: true });
+
+    // Validate request first (should be valid)
+    const v1 = await request(app)
+      .post('/relay/validate')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(v1.status).toBe(200);
+    expect(v1.body.valid).toBe(true);
+
+    // Validate request again (should still be valid because validate doesn't consume)
+    const v2 = await request(app)
+      .post('/relay/validate')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(v2.status).toBe(200);
+    expect(v2.body.valid).toBe(true);
+
+    // Execute the request
+    const e1 = await request(app)
+      .post('/relay/execute')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(e1.status).toBe(200);
+
+    // Now validate should fail because nonce is consumed
+    const v3 = await request(app)
+      .post('/relay/validate')
+      .set('Authorization', 'Bearer token')
+      .send(validBody);
+    expect(v3.status).toBe(422);
+    expect(v3.body.valid).toBe(false);
+    expect(v3.body.error.code).toBe('NONCE_REPLAY');
   });
 });

@@ -2,6 +2,7 @@ import { NetworkError } from '@ancore/stellar';
 import { RelayService } from '../../src/services/relayService';
 import { JobQueue } from '../../src/queue/JobQueue';
 import { IdempotencyStore } from '../../src/store/idempotency';
+import { NonceStore } from '../../src/store/nonceStore';
 import type {
   SignatureServiceContract,
   RelayExecuteRequest,
@@ -69,6 +70,23 @@ describe('RelayService', () => {
       expect(result.valid).toBe(false);
       expect(result.error?.code).toBe('NONCE_REPLAY');
     });
+
+    it('returns NONCE_REPLAY if nonce is already seen in nonceStore', async () => {
+      const nonceStore = new NonceStore();
+      nonceStore.track(VALID_KEY, 1);
+      const svc = new RelayService(
+        makeSignatureService(true),
+        undefined,
+        undefined,
+        undefined,
+        { useMockSubmission: true },
+        nonceStore
+      );
+      const result = await svc.validateRelay(makeRequest({ nonce: 1 }));
+      expect(result.valid).toBe(false);
+      expect(result.error?.code).toBe('NONCE_REPLAY');
+      expect(result.error?.message).toBe('Nonce already used');
+    });
   });
 
   describe('executeRelay', () => {
@@ -80,6 +98,29 @@ describe('RelayService', () => {
       expect(result.success).toBe(true);
       expect(result.transactionId).toMatch(/^[0-9A-F]{64}$/);
       expect(result.gasUsed).toBe(21_000);
+    });
+
+    it('tracks nonce in nonceStore upon successful execution', async () => {
+      const nonceStore = new NonceStore();
+      const svc = new RelayService(
+        makeSignatureService(true),
+        undefined,
+        undefined,
+        undefined,
+        { useMockSubmission: true },
+        nonceStore
+      );
+      const req = makeRequest({ nonce: 42 });
+      const r1 = await svc.executeRelay(req);
+      expect(r1.success).toBe(true);
+
+      // Now it should be in the store
+      expect(() => nonceStore.assertFresh(VALID_KEY, 42)).toThrow('Nonce already used');
+
+      // Subsequent execution with same request (nonce 42) should fail
+      const r2 = await svc.executeRelay(req);
+      expect(r2.success).toBe(false);
+      expect(r2.error?.code).toBe('NONCE_REPLAY');
     });
 
     it('returns network transaction hash from submitter on valid request', async () => {
