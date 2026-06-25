@@ -125,7 +125,7 @@ Execute a signed relay transaction.
 {
   "success": true,
   "transactionId": "<64-char hex>",
-  "gasUsed": 21000
+  "gasUsed": 0
 }
 ```
 
