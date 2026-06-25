@@ -16,7 +16,9 @@ import { createExecuteRelayHandler } from './handlers/executeRelay';
 import { createValidateRelayHandler } from './handlers/validateRelay';
 import { createHealthHandler } from './routes/health';
 import { IdempotencyStore } from './store/idempotency';
+import { NonceStore } from './store/nonceStore';
 import { JobQueue } from './queue/JobQueue';
+import { createBearerAuthService } from './services/bearerAuthService';
 import type {
   AuthServiceContract,
   SignatureServiceContract,
@@ -80,12 +82,16 @@ function parseAllowedOrigins(): string[] | string {
 }
 
 export function createApp(
-  authService: AuthServiceContract = stubAuthService,
+  authService?: AuthServiceContract,
   signatureService: SignatureServiceContract = defaultSignatureService,
   idempotencyStore: IdempotencyStore = new IdempotencyStore(),
   transactionSubmitter?: TransactionSubmitterContract,
-  relayOptions?: RelayServiceOptions
+  relayOptions?: RelayServiceOptions,
+  nonceStore: NonceStore = new NonceStore()
 ): Express {
+  const authSecret = process.env.RELAYER_AUTH_SECRET;
+  const resolvedAuthService =
+    authService ?? (authSecret ? createBearerAuthService(authSecret) : stubAuthService);
   const app = express();
 
   const corsOrigins = parseAllowedOrigins();
@@ -140,11 +146,18 @@ export function createApp(
   });
 
   const jobQueue = new JobQueue();
-  const relayService = new RelayService(signatureService, jobQueue, idempotencyStore, submitter, {
-    useMockSubmission,
-    ...relayOptions,
-  });
-  const auth = createAuthMiddleware(authService);
+  const relayService = new RelayService(
+    signatureService,
+    jobQueue,
+    idempotencyStore,
+    submitter,
+    {
+      useMockSubmission,
+      ...relayOptions,
+    },
+    nonceStore
+  );
+  const auth = createAuthMiddleware(resolvedAuthService);
   const validate = validateBody(relayRequestSchema);
   const idempotency = createIdempotencyMiddleware(idempotencyStore);
 

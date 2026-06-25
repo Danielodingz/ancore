@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import { validateTransferPolicy } from '@ancore/types';
 import type { JobQueue } from '../queue/JobQueue';
 import type { IdempotencyStore } from '../store/idempotency';
+import { NonceStore } from '../store/nonceStore';
 import type {
   RelayServiceContract,
   SignatureServiceContract,
@@ -45,7 +46,8 @@ export class RelayService implements RelayServiceContract {
     private readonly queue?: JobQueue,
     private readonly store?: IdempotencyStore,
     private readonly transactionSubmitter?: TransactionSubmitterContract,
-    options?: RelayServiceOptions
+    options?: RelayServiceOptions,
+    private readonly nonceStore?: NonceStore
   ) {
     this.useMockSubmission = isMockSubmissionEnabled(options);
   }
@@ -59,6 +61,18 @@ export class RelayService implements RelayServiceContract {
         valid: false,
         error: { code: 'NONCE_REPLAY', message: 'Nonce must be non-negative' },
       };
+    }
+
+    if (this.nonceStore) {
+      try {
+        this.nonceStore.assertFresh(request.sessionKey, request.nonce);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Nonce already used';
+        return {
+          valid: false,
+          error: { code: 'NONCE_REPLAY', message },
+        };
+      }
     }
 
     const payload = this.canonicalPayload(request);
@@ -89,6 +103,10 @@ export class RelayService implements RelayServiceContract {
     const validation = await this.validateRelay(request);
     if (!validation.valid) {
       return { success: false, error: validation.error, gasUsed: 0 };
+    }
+
+    if (this.nonceStore) {
+      this.nonceStore.track(request.sessionKey, request.nonce);
     }
 
     if (this.useMockSubmission) {
